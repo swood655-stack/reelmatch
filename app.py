@@ -78,6 +78,13 @@ def lookup_people(names):
     return ids, matched, missing
 
 
+def rating_label(m):
+    """Unreleased movies have no votes yet, so show 'Not rated yet' instead of 0.0."""
+    if not m.get("vote_count"):
+        return "🆕 Not rated yet"
+    return f"⭐ {m.get('vote_average', 0):.1f}"
+
+
 def go_to(page):
     st.session_state.page = page
 
@@ -118,7 +125,7 @@ def page_home():
             url = tmdb.poster_url(m.get("poster_path"), "w185")
             if url:
                 st.image(url)
-            st.caption(f"**{m.get('title', '')}**  \n⭐ {m.get('vote_average', 0):.1f}")
+            st.caption(f"**{m.get('title', '')}**  \n{rating_label(m)}")
 
 
 def page_discover(f):
@@ -343,7 +350,7 @@ def page_trending():
                         st.image(url)
                     year = (m.get("release_date") or "")[:4]
                     st.markdown(f"**{m.get('title', 'Untitled')}** {f'({year})' if year else ''}")
-                    st.caption(f"⭐ {m.get('vote_average', 0):.1f} · "
+                    st.caption(f"{rating_label(m)} · "
                                + ", ".join(gmap.get(g, '') for g in m.get("genre_ids", [])[:2]))
                     with st.expander("Plot"):
                         st.write(m.get("overview") or "No summary yet.")
